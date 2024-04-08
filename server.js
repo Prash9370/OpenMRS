@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Vonage } = require('@vonage/server-sdk')
 const express = require("express");
 const bodyParser = require('body-parser');
@@ -138,5 +139,5 @@ app.get('/otpverify', (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-    console.log('Server is Running on port ' + process.env.PORT);
+    console.log('Server is Running on port' + process.env.PORT);
 });
