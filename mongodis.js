@@ -4,7 +4,7 @@ async function main(){
     const db = await MDBconnect();
     
     await db.collection('patients').insertOne({
-            "patientid": "919307731511",
+            "patientid": "919370655646",
             "sessions": [
               {
                   "doctor": "Dr. Naresh Hushe",

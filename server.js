@@ -137,6 +137,6 @@ app.get('/otpverify', (req, res) => {
     sendSMS();
 });
 
-app.listen(3000, () => {
-    console.log('Running on 3000')
+app.listen(process.env.PORT, () => {
+    console.log('Server is Running on port ' + process.env.PORT);
 });
