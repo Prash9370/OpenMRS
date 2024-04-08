@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@vonage/server-sdk": "^3.14.0",
+    "express": "^4.19.2",
+    "mongodb": "^6.5.0"
+  }
+}

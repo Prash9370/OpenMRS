@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Patient Dashboard</title>
+    <style>
+        /* Add your CSS styles here */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0;
+        }
+
+        header {
+            background-color: #ffffff;
+            color: #4CAF50;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+        }
+
+        nav {
+            background-color: #4CAF50;
+            /* Updated color */
+            padding: 10px 0;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: #ffffff;
+            /* Updated text color */
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #dddddd;
+        }
+
+        footer {
+            background-color: #ffffff;
+            color: #666666;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+            box-shadow: 0 0 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            margin-top: 20px;
+        }
+
+        .session {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .session h2 {
+            margin-top: 0;
+            color: #4CAF50;
+        }
+
+        .session p {
+            margin: 5px 0;
+        }
+
+        .session hr {
+            margin-top: 10px;
+            border-color: #ddd;
+        }
+
+        /* Form styles */
+        form {
+            margin: 20px auto;
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #ffffff;
+        }
+
+        form input,
+        form textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        form button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        form button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>Patient Dashboard</h1>
+    </header>
+
+
+    <nav>
+        <a href="/">Hospital Login</a>
+        <a href="/patientLogin">Patient Login</a>
+        <a href="#">Contact Developer</a>
+    </nav>
+
+    <div id="patientSessions"></div>
+
+    <form id="addSessionForm">
+        <h2>Add Session</h2>
+        <input type="text" id="doctor" placeholder="Doctor" required><br>
+        <input type="text" id="diagnosis" placeholder="Diagnosis" required><br>
+        <textarea id="treatment" placeholder="Treatment" rows="4" required></textarea><br>
+        <textarea id="remarks" placeholder="Remarks" rows="4" required></textarea><br>
+        <input type="text" id="allergicMedicines" placeholder="Allergic Medicines" required><br>
+        <button type="submit">Add Session</button>
+    </form>
+
+    <footer>
+        <p>&copy; 2024 OpenMRS - Open-source Medical Records System</p>
+    </footer>
+
+    <script>
+        function displayPatientSessions() {
+            fetch('/patientdata', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ patientid: new URLSearchParams(window.location.search).get('patientid') })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    var patientSessionsContainer = document.getElementById("patientSessions");
+                    patientSessionsContainer.innerHTML = "";
+
+                    data.sessions.forEach(function (session) {
+                        var sessionDiv = document.createElement("div");
+                        sessionDiv.classList.add("session");
+                        sessionDiv.innerHTML = `
+                            <h2>Session at <span style="color: red;">${session.hospital}</span> on ${session.date}</h2>
+                            <p><strong>Doctor:</strong> ${session.doctor}</p>
+                            <p><strong>Diagnosis:</strong> ${session.diagnosis}</p>
+                            <p><strong>Treatment:</strong> ${session.treatment}</p>
+                            <p><strong>Remarks:</strong> ${session.remarks}</p>
+                            <p><strong>Allergic Medicines:</strong> ${session.allergicMedicines}</p>
+                            <hr>
+                        `;
+                        patientSessionsContainer.appendChild(sessionDiv);
+                    });
+                })
+                .catch(error => {
+                    alert('Patient Not Registered at OpenMRS');
+                    window.location.href = '/patientSignup';
+                });
+
+        }
+
+
+        function addSession(event) {
+            event.preventDefault();
+
+            var doctor = document.getElementById("doctor").value;
+            var diagnosis = document.getElementById("diagnosis").value;
+            var treatment = document.getElementById("treatment").value;
+            var remarks = document.getElementById("remarks").value;
+            var allergicMedicines = document.getElementById("allergicMedicines").value;
+            var hospital = localStorage.getItem("hospital");
+            var date = new Date().toISOString().split('T')[0];
+
+            var newSession = {
+                doctor: doctor,
+                diagnosis: diagnosis,
+                treatment: treatment,
+                remarks: remarks,
+                allergicMedicines: allergicMedicines,
+                hospital: hospital,
+                date: date
+            };
+
+            fetch('/postsession', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({patientid: new URLSearchParams(window.location.search).get('patientid') ,session: newSession})
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    alert("session uploaded successfully")
+                    document.getElementById("addSessionForm").reset();
+                    displayPatientSessions();
+                })
+                .catch(error => {
+                    alert("Session upload Error")
+                });
+        }
+
+        displayPatientSessions();
+
+        document.getElementById("addSessionForm").addEventListener("submit", addSession);
+    </script>
+</body>
+
+</html>

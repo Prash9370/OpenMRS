@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenMRS Patient Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #e0e0e0;
+        }
+
+        header {
+            background-color: #fff;
+            padding: 20px 20px 10px;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 2.5em;
+            color: #4CAF50;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            letter-spacing: 2px;
+            margin: 0;
+            text-align: left;
+        }
+
+        nav {
+            background-color: #fff;
+            padding: 10px 0;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        nav a {
+            color: #666;
+            text-decoration: none;
+            margin: 0 10px;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #333;
+        }
+
+        footer {
+            background-color: #fff;
+            color: #666;
+            padding: 10px 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        form {
+            background-color: #f0f0f0;
+            padding: 20px;
+            border-radius: 16px;
+            box-shadow: 10px 10px 20px #c0c0c0, -10px -10px 20px #ffffff;
+            max-width: 350px;
+            margin: 50px auto;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            color: #444;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0 20px 0;
+            border: none;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            box-shadow: inset 4px 4px 6px #d0d0d0, inset -4px -4px 6px #ffffff;
+            box-sizing: border-box;
+        }
+
+        .signup {
+            width: 100%;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            margin: 8px 0;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .signup:hover {
+            background-color: #45a049;
+        }
+
+        .btncontainer {
+            text-align: center;
+        }
+
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .sendotp {
+            width: 40%;
+            background-color: #078dfa;
+            padding: 10px 20px;
+            color: white;
+            margin: 8px auto;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sendotp:hover {
+            background-color: #0572cb;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>OpenMRS</h1>
+    </header>
+
+    <nav>
+        <a href="/">Hospital Login</a>
+        <a href="/patientLogin">Patient Login</a>
+        <a href="#">Contact Developer</a>
+    </nav>
+
+    <form id="patientSignupForm">
+        <h2>Patient Signup</h2>
+        <label for="fullName">Full Name:</label>
+        <input type="text" id="fullName" name="fullName" placeholder="Enter your full name" required>
+
+        <label for="mobileNumber">Mobile Number:</label>
+        <input type="text" id="mobileNumber" name="mobileNumber" placeholder="Enter your mobile number" required>
+
+        <div class="btncontainer">
+            <button class="sendotp" onclick="sendotp(event)">Send OTP</button>
+        </div>
+
+        <label for="otp">OTP:</label>
+        <input type="text" id="otp" name="otp" placeholder="Enter OTP" required>
+
+        <button class="signup" onclick="signup(event)">Signup</button>
+        <div class="btncontainer">
+            <button  onclick="goToPatientLogin()">Already Registered? Login</button>
+        </div>
+    </form>
+
+
+    <footer>
+        <p>2024 OpenMRS - Open-source Medical Records System</p>
+    </footer>
+
+    <script>
+        let number;
+        let otp;
+
+        function sendotp(event) {
+            event.preventDefault();
+            number = document.getElementById('mobileNumber').value;
+            if (number.length === 10) {
+                number = '91' + number;
+            } else if (number.length === 11 && number.startsWith('0')) {
+                number = '91' + number.substring(1);
+            } else if (number.length === 12 && number.startsWith('91')) {
+                number = number
+            } else {
+                alert('Invalid phone number');
+                return true;
+            }
+            otp = Math.floor(Math.random() * (9999 - 1111 + 1)) + 1111;
+            console.log(otp);
+            document.getElementById('mobileNumber').disabled = true;
+
+            fetch(`/otpverify?number=${number}&otp=${otp}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('OTP sent successfully');
+                    } else {
+                        alert('Some Error Occurred. Try Again Later.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error sending OTP:', error);
+                    alert('Some Error Occurred. Try Again Later.');
+                });
+        }
+
+        function signup(event) {
+            event.preventDefault();
+            var otpinput = document.getElementById("otp").value;
+            if (otpinput == otp) {
+                alert('OTP Matched');
+                var fullName = document.getElementById("fullName").value;
+                var mobileNumber = document.getElementById("mobileNumber").value;
+                if (mobileNumber.length === 10) {
+                    mobileNumber = '91' + mobileNumber;
+                } else if (mobileNumber.length === 11 && mobileNumber.startsWith('0')) {
+                    mobileNumber = '91' + mobileNumber.substring(1);
+                } else if (mobileNumber.length === 12 && mobileNumber.startsWith('91')) {
+                    mobileNumber = mobileNumber
+                } else {
+                    alert('Invalid phone number');
+                    return true;
+                }
+
+                fetch('/patientSignup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ fullName, mobileNumber }),
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = "/patientdashboard?patientid=" + number;
+                        } else {
+                            alert(data.message);
+                            window.location.href = "/patientLogin";
+                        }
+                    })
+                    .catch(error => {
+                        console.error('There was a problem with your fetch operation:', error);
+                    });
+
+            } else {
+                alert("Incorrect OTP")
+            }
+        }
+        function goToPatientLogin() {
+            window.location.href = "/patientLogin";
+        }
+
+    </script>
+</body>
+
+</html>
